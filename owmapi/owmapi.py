@@ -3,31 +3,31 @@ import json
 from copy import deepcopy
 
 from collections import defaultdict
-from abc import abstractmethod
 
 BASE_URL = 'http://api.openweathermap.org/'
-
+CITY = 'London'
+UNIT = 'metric'
+COUNTRY= 14
 
 class OWMAPI(object):
     def __init__(self, base_url):
         self.base_url = base_url
 
-    @abstractmethod
-    def _get(self):
-        raise NotImplementedError
+    def get(self):
+        return getattr(requests, 'get')
+
+    def pretty_print(self, result):
+        return json.dumps(result, indent=4)
 
 
 class OWMForecastHTTPAPI(OWMAPI):
-    def __init__(self, base_url=BASE_URL, city='London', unit='metric', country=14):
+    def __init__(self, base_url=BASE_URL, city=CITY, unit=UNIT, country=COUNTRY):
         super().__init__(base_url)
         self._api_key = None
         self._city = city
         self._unit = unit
         self._country = country
         self._set_response = None
-
-    def _get(self):
-        return getattr(requests, 'get')
 
     @property
     def api_key(self):
@@ -49,15 +49,15 @@ class OWMForecastHTTPAPI(OWMAPI):
             else:
                 raise Exception('Need to set city, country, and units and api_keys')
         except TypeError as e:
-            raise "Type Error %s" % e
+            print("Type Error %s" % e)
 
     def create_response(self):
         try:
-            response = self._get()(url=self.url)
+            response = self.get()(url=self.url)
         except ConnectionError as e:
-            raise 'Connection Error %s' % e
+            print('Connection Error %s' % e)
         except AttributeError as e:
-            raise 'Missing attribute url %s' % e
+            print('Missing attribute url %s' % e)
 
         else:
             if response.status_code == 200:
@@ -76,10 +76,7 @@ class OWMForecastHTTPAPI(OWMAPI):
         self._city = city
         self.prepare_request()
         self.create_response()
-        return self._pretty_print(self._get_response)
-
-    def _pretty_print(self, result):
-        return json.dumps(result, indent=4)
+        return self.pretty_print(self._get_response)
 
     def filter_response(self):
         data = defaultdict(dict)
@@ -108,5 +105,5 @@ class OWMForecastHTTPAPI(OWMAPI):
                         result.append(data)
         except KeyError as e:
             print("Key Error %s", e)
-        return self._pretty_print(result)
+        return self.pretty_print(result)
 
