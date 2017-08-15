@@ -25,9 +25,9 @@ pip install -r requirements.txt
 
 Command: python manage.py -c London,UK -f
 
--f will get the filtered response
--i will give the whole response that comes from the api
--c is required field to search for a city
+`-f will get the filtered response`
+`-i will give the whole response that comes from the api`
+`-c is required field to search for a city`
 
 Output:
 
